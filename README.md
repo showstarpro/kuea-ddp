@@ -68,7 +68,11 @@ Note to edit the `--vision_tower` filed of the script to denote the directory of
 We utilize the tool provided by [Prismatic library](https://github.com/TRI-ML/prismatic-vlms) for evaluation of the LLaVA.
 
 ## Pre-trained checkpoints
-coming soon
+The pretrained checkpoints for the CLIP vision encoder can be downloaded from OneDrive.
+
+[ViT-L-14-224](https://mycuhk-my.sharepoint.com/:f:/g/personal/1155187960_link_cuhk_edu_hk/Evj3UUqXLpRNjwQ0pQi-NugB7-JuKxU4xxGiqjrBH_MRDA?e=7SNAec)
+
+[ViT-L-14-336](https://mycuhk-my.sharepoint.com/:f:/g/personal/1155187960_link_cuhk_edu_hk/Eh90Ji9PvF9Hk70NEa0pKcsBReM1UDIVm3fTNUNKB6pngQ?e=57emeO)
 
 ## Bibtex
 If you find this work helpful, you can cite our paper as follows:
