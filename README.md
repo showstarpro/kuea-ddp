@@ -11,8 +11,9 @@ We recommend to install the environment through conda:
 
 ```
 cd KUEA
-conda env create -f environment.yml -n myenv
+conda create --name myenv python=3.11
 conda activate myenv
+pip install -r requirements.txt
 ```
 
 ## Alignment Fine-tuning
