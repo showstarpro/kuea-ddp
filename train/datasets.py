@@ -48,13 +48,23 @@ class ImageNetDataset(ImageFolder):
         return sample, target
 
 
-def make_wds_dataset(shards_path, transform, epoch_length):
+def make_wds_dataset(shards_path, transform, batch_size, steps_per_gpu, tokenizer):
     dataset = (
-        wds.WebDataset(shards_path, shardshuffle=True, nodesplitter=wds.split_by_node)
+        wds.WebDataset(
+            shards_path,
+            shardshuffle=True,
+            nodesplitter=wds.split_by_node,
+            resampled=True,
+        )
         .shuffle(1000)
         .decode("pil")
-        .to_tuple("jpg;png;jpeg;webp", "txt")
-        .map_tuple(transform, lambda x: x)
+        .rename(image="jpg;png;jpeg;webp", text="txt")
+        .map_dict(
+            image=transform,
+            text=lambda t: tokenizer(t)[0]  # [0] 去掉 batch 维，shape: (seq_len,)
+        )
+        .to_tuple("image", "text")
+        .batched(batch_size, partial=False)
+        .with_epoch(steps_per_gpu)
     )
-    dataset = dataset.with_epoch(epoch_length)
     return dataset

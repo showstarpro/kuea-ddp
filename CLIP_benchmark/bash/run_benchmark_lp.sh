@@ -7,7 +7,7 @@ SECONDS=0
 SAMPLES=-1
 BS=64
 
-SAVE_DIR=../CLIP_benchmark/result  # TODO
+SAVE_DIR=../CLIP_benchmark/result/kuea  # TODO
 mkdir -p "$SAVE_DIR"
 python -m clip_benchmark.cli eval --dataset_root "../CLIP_benchmark/datasets/wds_{dataset_cleaned}" --dataset benchmark/datasets_lp.txt --task linear_probe \
 --pretrained_model benchmark/models.txt \

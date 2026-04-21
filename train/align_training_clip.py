@@ -193,11 +193,22 @@ def main(args):
         )
     elif args.dataset == 'cc3m':
         assert args.wds_path != '', '--wds_path is required for cc3m dataset'
-        epoch_length = args.wds_train_length // (args.batch_size * world_size)
+        
+        # 每个 GPU 每个 epoch 处理的样本数
+        samples_per_gpu = args.wds_train_length // world_size
+        # 每个 GPU 的迭代步数（即 epoch 内的 batch 数）
+        steps_per_gpu = samples_per_gpu // args.batch_size
+        if args.clip_model_name == "SigLip":
+            tokenizer = tokenizer
+        else:
+            tokenizer = open_clip.tokenize
+
         dataset = make_wds_dataset(
             shards_path=args.wds_path,
             transform=preprocessor_without_normalize,
-            epoch_length=epoch_length,
+            batch_size=args.batch_size,
+            steps_per_gpu=steps_per_gpu,
+            tokenizer=tokenizer
         )
 
     dataset_eval = ImageNetDataset(
@@ -208,8 +219,10 @@ def main(args):
     if use_wds:
         train_sampler = None
         dataloader = DataLoader(
-            dataset, batch_size=args.batch_size,
-            num_workers=8, drop_last=True, pin_memory=True,
+            dataset,
+            batch_size=None,       # 已经在dataset内部batched，这里必须None
+            num_workers=8,
+            pin_memory=True,
         )
     else:
         train_sampler = DistributedSampler(
@@ -324,7 +337,7 @@ def main(args):
 
     # compute amount of steps
     if use_wds:
-        steps_per_epoch = args.wds_train_length // (args.batch_size * world_size)
+        steps_per_epoch = args.wds_train_length // ( args.batch_size * world_size )
     else:
         steps_per_epoch = len(dataloader)
 
@@ -443,7 +456,7 @@ def train_one_epoch(
 
     epoch_start_time = time.time()
     for i, (data, targets) in enumerate(dataloader):
-        is_classification = isinstance(targets, torch.Tensor)
+        is_classification = isinstance(targets, torch.Tensor) and targets.dim() == 1
         data = data.to(args.device)
         n_samples = data.shape[0]
         if is_classification:

@@ -1,2 +1,5 @@
+ViT-L-14,/lpai/inputs/models/showstarpro__kuea/26-04-16-0248/ViT-L-14-openai-kuea.pt
 ViT-B-16,/lpai/inputs/models/lhp-model-v2/kuea-vit-b-16-224-openai-ep2/ViT-B-16_openai_imagenet_l2_imagenet_exp_1_OKbk9/checkpoints/final.pt
+ViT-B-16,/lpai/inputs/models/lhp-model-v2/kuea-vit-b-16-224-openai-ep2/ViT-B-16_openai_imagenet_l2_imagenet_exp_1_OKbk9/checkpoints/step_2500.pt
 ViT-L-14,/lpai/inputs/models/lhp-model-v2/kuea-vit-l-224-openai-2ep/ViT-L-14_openai_imagenet_l2_imagenet_exp_1_0SJ28/checkpoints/final.pt
+ViT-L-14,/lpai/inputs/models/lhp-model-v2/kuea-vit-l-224-openai-2ep/ViT-L-14_openai_imagenet_l2_imagenet_exp_1_0SJ28/checkpoints/step_5000.pt
