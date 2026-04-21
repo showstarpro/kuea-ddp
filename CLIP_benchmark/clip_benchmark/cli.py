@@ -32,6 +32,7 @@ def get_parser_args():
     parser_eval.add_argument('--no_amp', action="store_false", dest="amp", default=False, help="whether to use mixed precision")  # we set default to False, as we don't want amp for attacks
     parser_eval.add_argument('--num_workers', default=4, type=int)
     parser_eval.add_argument('--lora', action='store_true')
+    parser_eval.add_argument('--load_full_model', action='store_true', help="load both vision and text encoder weights from checkpoint")
     parser_eval.add_argument('--recall_k', default=[5], type=int, help="for retrieval, select the k for Recall@K metric. ", nargs="+",)
     parser_eval.add_argument('--fewshot_k', default=-1, type=int, help="for linear probe, how many shots. -1 = whole dataset.")
     parser_eval.add_argument('--fewshot_epochs', default=10, type=int, help="for linear probe, how many epochs.")
@@ -228,7 +229,8 @@ def run(args):
             pretrained=args.pretrained if not args.interpolate else inter_dict,
             cache_dir=args.model_cache_dir,
             device=args.device,
-            lora=args.lora
+            lora=args.lora,
+            load_full_model=args.load_full_model
         )
         if ("cifar10" in args.dataset) or ("cifar100" in args.dataset) or ("stl10" in args.dataset):
             # compute robustness wrt. original resolution

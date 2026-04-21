@@ -3,6 +3,7 @@ import json
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
+import webdataset as wds
 
 
 class COCOFlickrDataset(Dataset):
@@ -45,3 +46,15 @@ class ImageNetDataset(ImageFolder):
         sample, target = super().__getitem__(idx)
         # target_label = IMAGENET_1K_CLASS_ID_TO_LABEL[target]
         return sample, target
+
+
+def make_wds_dataset(shards_path, transform, epoch_length):
+    dataset = (
+        wds.WebDataset(shards_path, shardshuffle=True, nodesplitter=wds.split_by_node)
+        .shuffle(1000)
+        .decode("pil")
+        .to_tuple("jpg;png;jpeg;webp", "txt")
+        .map_tuple(transform, lambda x: x)
+    )
+    dataset = dataset.with_epoch(epoch_length)
+    return dataset

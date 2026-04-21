@@ -12,7 +12,7 @@ class ClipVisionModel(torch.nn.Module):
         embedding = self.model(vision)
         embedding = self.projector(embedding)
         return embedding
-def load_open_clip(model_name: str = "ViT-B-32-quickgelu", pretrained: str = "laion400m_e32", cache_dir: str = None, device="cpu", lora=False):
+def load_open_clip(model_name: str = "ViT-B-32-quickgelu", pretrained: str = "laion400m_e32", cache_dir: str = None, device="cpu", lora=False, load_full_model=False):
     if model_name == "ViT-L-14-DIVA":
         import clip
         model, transform = clip.load('ViT-L/14', "cpu")
@@ -109,12 +109,36 @@ def load_open_clip(model_name: str = "ViT-B-32-quickgelu", pretrained: str = "la
             checkpoint = torch.load(pretrained, map_location=torch.device('cpu'))
         else:
             checkpoint = pretrained
-        if 'vision_encoder_state_dict' in checkpoint.keys():  # tecoa checkpoint
-            model.visual.load_state_dict(checkpoint['vision_encoder_state_dict'])
+        if load_full_model:
+            print("### Load the full model including text encoder and vision encoder")
+            if 'vision_encoder_state_dict' in checkpoint.keys():
+                model.visual.load_state_dict(checkpoint['vision_encoder_state_dict'])
+                if 'text_encoder_state_dict' in checkpoint:
+                    model.text.load_state_dict(checkpoint['text_encoder_state_dict'])
+            else:
+                model.load_state_dict(checkpoint, strict=False)
         else:
-            model.visual.load_state_dict(checkpoint)
+            print("### Only load the vision encoder")
+            if 'vision_encoder_state_dict' in checkpoint.keys():
+                # tecoa checkpoint
+                model.visual.load_state_dict(checkpoint['vision_encoder_state_dict'])
+            else:
+                # 判断 checkpoint 是纯 visual 还是完整 CLIP
+                has_visual_prefix = any(k.startswith('visual.') for k in checkpoint.keys())
+                
+                if has_visual_prefix:
+                    # 完整 CLIP checkpoint → 提取 visual 部分并去掉 visual. 前缀
+                    visual_state_dict = {
+                        k.replace('visual.', ''): v 
+                        for k, v in checkpoint.items() 
+                        if k.startswith('visual.')
+                    }
+                    model.visual.load_state_dict(visual_state_dict)
+                    print(f"  Extracted {len(visual_state_dict)} visual keys from full CLIP checkpoint")
+                else:
+                    # 纯 visual encoder checkpoint（没有 visual. 前缀）
+                    model.visual.load_state_dict(checkpoint)
     except Exception as e:
-        # try loading whole model
         print(f'error: {e}', file=sys.stderr)
         print('retrying by loading whole model..', file=sys.stderr)
         torch.cuda.empty_cache()

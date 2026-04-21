@@ -1,3 +1,4 @@
+wds/imagenet1k
 wds/vtab/cifar10
 wds/vtab/cifar100
 wds/vtab/caltech101
